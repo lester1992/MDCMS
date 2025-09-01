@@ -1,0 +1,74 @@
+﻿<div class="top-row ps-3 navbar navbar-dark">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="">MallDirectoryCMS</a>
+        <button title="Navigation menu" class="navbar-toggler" @onclick="ToggleNavMenu">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+    </div>
+</div>
+
+<div class="@NavMenuCssClass nav-scrollable" @onclick="ToggleNavMenu">
+    <nav class="nav flex-column">
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
+                <i class="bi bi-speedometer2 fs-6"></i>
+                <span>Dashboard</span>
+            </NavLink>
+        </div>
+        <div class="nav-item px-3">
+            <NavLink class="nav-link">
+                <i class="bi bi-shop fs-6"></i>
+                <span>Shop</span>
+            </NavLink>
+        </div>
+        <div class="nav-item px-3">
+            <NavLink class="nav-link">
+                <i class="bi bi-collection-play" fs-6"></i>
+                <span>Multimedia</span>
+            </NavLink>
+        </div>
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" >
+                <i class="bi bi-people" fs-6"></i>
+                <span>Users</span>
+            </NavLink>
+        </div>
+        <div class="nav-item px-3">
+            <NavLink class="nav-link">
+                <i class="bi bi-activity" fs-6"></i>
+                <span>Activities</span>
+            </NavLink>
+        </div>
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="weather">
+                <i class="bi bi-sliders" fs-6"></i>
+                <span>Settings</span>
+            </NavLink>
+        </div>
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="weather">
+                <i class="bi bi-box-arrow-left" fs-6"></i>
+                <span>Logout</span>
+            </NavLink>
+        </div>
+    </nav>
+</div>
+
+<style>
+    .nav-link .bi {
+        vertical-align: middle;
+        margin-right: 6px;
+        margin-top: -24px !important
+    }
+
+</style>
+@code {
+    private bool collapseNavMenu = true;
+
+    private string? NavMenuCssClass => collapseNavMenu ? "collapse" : null;
+
+    private void ToggleNavMenu()
+    {
+        collapseNavMenu = !collapseNavMenu;
+    }
+}

@@ -1,0 +1,57 @@
+﻿@page "/login"
+@layout AuthLayout
+@using MudBlazor
+
+<MudText Typo="Typo.h5" Align="Align.Center" GutterBottom="true">
+    Directory CMS
+</MudText>
+
+<MudForm @ref="_form" OnValidSubmit="HandleValidSubmit">
+    <MudTextField Label="Username"
+                  @bind-Value="Model.Username"
+                  Variant="Variant.Outlined"
+                  FullWidth="true"
+                  Required="true"
+                  Class="mb-4" />
+
+    <MudTextField Label="Password"
+                  @bind-Value="Model.Password"
+                  Variant="Variant.Outlined"
+                  InputType="InputType.Password"
+                  FullWidth="true"
+                  Required="true"
+                  Class="mb-4" />
+
+    <MudButton Type="Submit"
+               Variant="Variant.Filled"
+               Color="Color.Warning"
+               FullWidth="true">
+        Login
+    </MudButton>
+</MudForm>
+
+@code {
+    private MudForm? _form;
+
+    private LoginModel Model { get; set; } = new();
+
+    private async Task HandleValidSubmit()
+    {
+        if (Model.Username == "admin" && Model.Password == "123")
+        {
+            Snackbar.Add("Login successful!", Severity.Success);
+        }
+        else
+        {
+            Snackbar.Add("Invalid username or password.", Severity.Error);
+        }
+    }
+
+    [Inject] ISnackbar Snackbar { get; set; } = default!;
+
+    public class LoginModel
+    {
+        public string Username { get; set; } = "";
+        public string Password { get; set; } = "";
+    }
+}
