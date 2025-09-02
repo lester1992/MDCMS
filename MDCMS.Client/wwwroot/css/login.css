@@ -1,0 +1,12 @@
+﻿.login-background {
+    background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.login-card {
+    background-color: #ffffff;
+    border-radius: 16px;
+}

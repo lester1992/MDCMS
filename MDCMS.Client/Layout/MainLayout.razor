@@ -1,16 +1,84 @@
 ﻿@inherits LayoutComponentBase
-<div class="page">
-    <div class="sidebar">
-        <NavMenu />
-    </div>
+@using MudBlazor
+@using MDCMS.Client.Services
+@inject AuthService AuthService
+@inject NavigationManager Nav
 
-    <main>
-        <div class="top-row px-4">
-            <a href="/profile">Lester Imperial</a>
-        </div>
+<MudLayout>
 
-        <article class="content px-4">
-            @Body
-        </article>
-    </main>
-</div>
+	<!-- Sidebar / Drawer -->
+	<MudDrawer @bind-Open="_drawerOpen"
+			   Anchor="Anchor.Left"
+			   Variant="@_drawerVariant"
+			   Elevation="2"
+			   Class="pa-4">
+		<div class="d-flex justify-center mb-4">
+			<img src="images/loginlogo.png" alt="Login Logo" style="max-width: 150px; height: auto;" />
+		</div>
+
+		<MudNavMenu Dense="true">
+			<MudNavLink Href="/dashboard" Icon="@Icons.Material.Filled.Dashboard">Dashboard</MudNavLink>
+			<MudNavLink Href="/billing" Icon="@Icons.Material.Filled.StoreMallDirectory">Stores</MudNavLink>
+			<MudNavGroup Title="Multimedia" Icon="@Icons.Material.Filled.VideoLibrary">
+				<MudNavLink Href="/video-ads">Video Ads</MudNavLink>
+				<MudNavLink Href="/image-ads">Image Ads</MudNavLink>
+			</MudNavGroup>
+			<MudNavGroup Title="Activity" Icon="@Icons.Material.Filled.History">
+				<MudNavLink Href="/kiosk-searches">Kiosk Searches</MudNavLink>
+				<MudNavLink Href="/kiosk-idle">Kiosk Idle</MudNavLink>
+				<MudNavLink Href="/video-logs">Video Logs</MudNavLink>
+				<MudNavLink Href="/image-logs">Image Logs</MudNavLink>
+			</MudNavGroup>
+			<MudNavLink Href="/users" Icon="@Icons.Material.Filled.Group">Users</MudNavLink>
+			<MudNavLink Href="/settings" Icon="@Icons.Material.Filled.Settings">Settings</MudNavLink>
+
+		</MudNavMenu>
+	</MudDrawer>
+
+	<!-- Top AppBar -->
+	<MudAppBar Elevation="1">
+		<!-- Drawer toggle (visible on mobile only) -->
+		<MudIconButton Icon="@Icons.Material.Filled.Menu"
+					   Color="Color.Inherit"
+					   Edge="Edge.Start"
+					   OnClick="ToggleDrawer" />
+
+		@* <MudText Typo="Typo.h6" Class="ml-2">Admin Dashboard</MudText> *@
+		<MudSpacer />
+
+		<!-- Profile Avatar + Dropdown -->
+		<MudMenu AnchorOrigin="Origin.TopRight" TransformOrigin="Origin.TopRight">
+			<ActivatorContent>
+				<MudAvatar Size="Size.Medium"
+						   Image="images/avatar.png"
+						   Class="cursor-pointer" />
+			</ActivatorContent>
+			<ChildContent>
+				<MudMenuItem Icon="@Icons.Material.Filled.Person" Href="/profile">Profile</MudMenuItem>
+				<MudMenuItem Icon="@Icons.Material.Filled.ExitToApp" OnClick="Logout">Logout</MudMenuItem>
+			</ChildContent>
+		</MudMenu>
+	</MudAppBar>
+
+	<!-- Main Content -->
+	<MudMainContent>
+		<MudContainer MaxWidth="MaxWidth.False" Class="pa-6">
+			@Body
+		</MudContainer>
+	</MudMainContent>
+
+</MudLayout>
+
+@code {
+	private bool _drawerOpen = true;
+	private DrawerVariant _drawerVariant = DrawerVariant.Responsive;
+
+	private void ToggleDrawer() => _drawerOpen = !_drawerOpen;
+
+
+	private async void Logout()
+	{
+		await AuthService.LogoutAsync();
+		Nav.NavigateTo("/login", true);
+	}
+}

@@ -1,57 +1,77 @@
 ﻿@page "/login"
+@using MDCMS.Client.Services
 @layout AuthLayout
+@inject NavigationManager Nav
+@inject ISnackbar Snackbar
+@inject AuthService AuthService
 @using MudBlazor
 
-<MudText Typo="Typo.h5" Align="Align.Center" GutterBottom="true">
-    Directory CMS
-</MudText>
+<MudCard Style="width:400px; padding:20px;">
+    <MudCardContent>
 
-<MudForm @ref="_form" OnValidSubmit="HandleValidSubmit">
-    <MudTextField Label="Username"
-                  @bind-Value="Model.Username"
-                  Variant="Variant.Outlined"
-                  FullWidth="true"
-                  Required="true"
-                  Class="mb-4" />
+        <!-- Logo -->
+        <div class="d-flex justify-center mb-4">
+            <img src="images/loginlogo.png" alt="Login Logo" style="max-width: 150px; height: auto;" />
+        </div>
 
-    <MudTextField Label="Password"
-                  @bind-Value="Model.Password"
-                  Variant="Variant.Outlined"
-                  InputType="InputType.Password"
-                  FullWidth="true"
-                  Required="true"
-                  Class="mb-4" />
+        <MudTextField @bind-Value="_username" Label="Username" Variant="Variant.Outlined" FullWidth="true" />
+        <MudTextField @bind-Value="_password" Label="Password" Variant="Variant.Outlined" InputType="InputType.Password" FullWidth="true" Class="mb-3" />
 
-    <MudButton Type="Submit"
-               Variant="Variant.Filled"
-               Color="Color.Warning"
-               FullWidth="true">
-        Login
-    </MudButton>
-</MudForm>
+        <div class="g-recaptcha"
+             data-sitekey="6LfCGrArAAAAALhzrEEbN6Ej3iyhiPwV0LuN1LRg"
+             data-callback="onRecaptchaSuccess"
+             style="min-height: 78px;"></div>
+
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="LoginUser" FullWidth="true" Class="mt-5" Style="height:50px" Disabled="_isLoading">
+            @if (_isLoading)
+            {
+                <MudProgressCircular Indeterminate="true" Size="Size.Small" Class="mr-2" />
+                <span>Logging in...</span>
+            }
+            else
+            {
+                <span>Login</span>
+            }
+        </MudButton>
+    </MudCardContent>
+</MudCard>
 
 @code {
-    private MudForm? _form;
+    private string _username = "";
+    private string _password = "";
+    private bool _isLoading = false;
 
-    private LoginModel Model { get; set; } = new();
-
-    private async Task HandleValidSubmit()
+    private async Task LoginUser()
     {
-        if (Model.Username == "admin" && Model.Password == "123")
+        _isLoading = true;
+
+        try
         {
-            Snackbar.Add("Login successful!", Severity.Success);
+            var success = await AuthService.LoginAsync(_username, _password);
+
+            if (success)
+            {
+                Snackbar.Add("Login successful!", Severity.Success);
+                Nav.NavigateTo("/", true); // redirect to dashboard (protected)
+            }
+            else
+            {
+                Snackbar.Add("Invalid username or password.", Severity.Error);
+            }
         }
-        else
+        catch (Exception ex)
         {
-            Snackbar.Add("Invalid username or password.", Severity.Error);
+            Snackbar.Add($"Login failed: {ex.Message}", Severity.Error);
         }
+
+        _isLoading = false;
     }
 
-    [Inject] ISnackbar Snackbar { get; set; } = default!;
-
-    public class LoginModel
+    [JSInvokable]
+    public static Task OnRecaptchaSuccess(string token)
     {
-        public string Username { get; set; } = "";
-        public string Password { get; set; } = "";
+        // Store this token if you want to validate it server-side
+        Console.WriteLine("reCAPTCHA Token: " + token);
+        return Task.CompletedTask;
     }
 }

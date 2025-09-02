@@ -1,7 +1,41 @@
-﻿@page "/"
+﻿@page "/dashboard"
+@layout MainLayout
+@using MudBlazor
+@using Microsoft.AspNetCore.Authorization
+@attribute [Authorize]
 
-<PageTitle>Home</PageTitle>
+<MudText Typo="Typo.h4" GutterBottom="true">Dashboard</MudText>
 
-<h1>Hello, world!</h1>
+<MudGrid>
+    <MudItem xs="12" sm="6" md="3">
+        <MudPaper Class="pa-4 d-flex flex-column align-center" Elevation="4">
+            <MudIcon Icon="@Icons.Material.Filled.People" Size="Size.Large" Color="Color.Primary" />
+            <MudText Typo="Typo.h6">Users</MudText>
+            <MudText Typo="Typo.subtitle2">1,250</MudText>
+        </MudPaper>
+    </MudItem>
 
-Welcome to your new app.
+    <MudItem xs="12" sm="6" md="3">
+        <MudPaper Class="pa-4 d-flex flex-column align-center" Elevation="4">
+            <MudIcon Icon="@Icons.Material.Filled.ShoppingCart" Size="Size.Large" Color="Color.Secondary" />
+            <MudText Typo="Typo.h6">Orders</MudText>
+            <MudText Typo="Typo.subtitle2">320</MudText>
+        </MudPaper>
+    </MudItem>
+
+    <MudItem xs="12" sm="6" md="3">
+        <MudPaper Class="pa-4 d-flex flex-column align-center" Elevation="4">
+            <MudIcon Icon="@Icons.Material.Filled.ShowChart" Size="Size.Large" Color="Color.Success" />
+            <MudText Typo="Typo.h6">Revenue</MudText>
+            <MudText Typo="Typo.subtitle2">$12,500</MudText>
+        </MudPaper>
+    </MudItem>
+
+    <MudItem xs="12" sm="6" md="3">
+        <MudPaper Class="pa-4 d-flex flex-column align-center" Elevation="4">
+            <MudIcon Icon="@Icons.Material.Filled.Notifications" Size="Size.Large" Color="Color.Error" />
+            <MudText Typo="Typo.h6">Alerts</MudText>
+            <MudText Typo="Typo.subtitle2">5</MudText>
+        </MudPaper>
+    </MudItem>
+</MudGrid>

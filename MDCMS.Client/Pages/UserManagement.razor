@@ -1,0 +1,153 @@
+﻿@page "/"
+@layout MainLayout
+@using System.Net.Http.Json
+@using MudBlazor
+@using MDCMS.Client.Models
+@inject HttpClient Http
+@inject ISnackbar Snackbar
+
+<MudPaper Class="pa-4">
+    <MudText Typo="Typo.h5" Class="mb-2">List of Users</MudText>
+
+    <MudTable Items="@users" Hover="true" Dense="true" Filter="FilterUsers"
+              RowEditPreview="BackupUser" RowEditCancel="ResetUserToOriginalValues" RowEditCommit="SaveUserAsync"
+              CanCancelEdit="true" SortLabel="Sort By" EditTrigger="TableEditTrigger.EditButton">
+        <ToolBarContent>
+            <MudTextField @bind-Value="searchString" Placeholder="Search users..."
+            Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" Class="mt-0" />
+            <MudSpacer />
+            <MudButton Variant="Variant.Filled" Color="Color.Primary">Add User</MudButton>
+        </ToolBarContent>
+        <HeaderContent>
+            <MudTh>ID</MudTh>
+            <MudTh>Username</MudTh>
+            <MudTh>Email</MudTh>
+            <MudTh>Designation</MudTh>
+            <MudTh>Actions</MudTh>
+        </HeaderContent>
+        <RowTemplate>
+            <MudTd DataLabel="ID">@context.Id</MudTd>
+            <MudTd DataLabel="Username">@context.Username</MudTd>
+            <MudTd DataLabel="Email">@context.Email</MudTd>
+            <MudTd DataLabel="Designation">@context.Designation</MudTd>
+            <MudTd>
+                <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error"
+                OnClick="@(() => DeleteUserAsync(context))" />
+            </MudTd>
+        </RowTemplate>
+        <RowEditingTemplate>
+            <MudTd DataLabel="ID">@context.Id</MudTd>
+            <MudTd DataLabel="Username">
+                <MudTextField @bind-Value="context.Username" Required="true" />
+            </MudTd>
+            <MudTd DataLabel="Email">
+                <MudTextField @bind-Value="context.Email" Required="true" />
+            </MudTd>
+            <MudTd DataLabel="Designation">
+                <MudSelect @bind-Value="context.Designation" Required="true">
+                    <MudSelectItem Value="@("Admin")">Admin</MudSelectItem>
+                    <MudSelectItem Value="@("Manager")">Manager</MudSelectItem>
+                    <MudSelectItem Value="@("User")">User</MudSelectItem>
+
+                </MudSelect>
+            </MudTd>
+            <MudTd>
+                <MudText>Editing...</MudText>
+            </MudTd>
+        </RowEditingTemplate>
+        <PagerContent>
+            <MudTablePager />
+        </PagerContent>
+        <EditButtonContent Context="button">
+            <MudIconButton Size="Size.Small" Icon="@Icons.Material.Outlined.Edit"
+            OnClick="@button.ButtonAction" Disabled="@button.ButtonDisabled" />
+        </EditButtonContent>
+    </MudTable>
+</MudPaper>
+
+@code {
+    private List<User> users = new();
+    private string searchString = "";
+    private User? backupUser;
+
+    protected override async Task OnInitializedAsync()
+    {
+        users = await Http.GetFromJsonAsync<List<User>>("/api/users") ?? new();
+    }
+
+    private bool FilterUsers(User user)
+    {
+        if (string.IsNullOrWhiteSpace(searchString))
+            return true;
+
+        return user.Username.Contains(searchString, StringComparison.OrdinalIgnoreCase)
+            || user.Email.Contains(searchString, StringComparison.OrdinalIgnoreCase)
+            || user.Designation.Contains(searchString, StringComparison.OrdinalIgnoreCase);
+    }
+
+
+
+    private void BackupUser(object user)
+    {
+        var u = (User)user;
+        backupUser = new User
+            {
+                Id = u.Id,
+                Username = u.Username,
+                Email = u.Email,
+                Designation = u.Designation,
+                IsActive = u.IsActive,
+                AllowedPages = new List<string>(u.AllowedPages),
+                PasswordHash = u.PasswordHash,
+                DateModified = u.DateModified
+            };
+    }
+
+    private async void SaveUserAsync(object user)
+    {
+        var u = (User)user;
+        var response = await Http.PutAsJsonAsync($"/api/users/{u.Id}", u);
+
+        if (response.IsSuccessStatusCode)
+        {
+            Snackbar.Add("User updated successfully", Severity.Success);
+        }
+        else
+        {
+            Snackbar.Add("Failed to update user", Severity.Error);
+            ResetUserToOriginalValues(user);
+        }
+    }
+
+    private void ResetUserToOriginalValues(object user)
+    {
+        var u = (User)user;
+        if (backupUser != null)
+        {
+            u.Username = backupUser.Username;
+            u.Email = backupUser.Email;
+            u.Designation = backupUser.Designation;
+        }
+    }
+
+    private async Task DeleteUserAsync(User user)
+    {
+        var response = await Http.DeleteAsync($"/api/users/{user.Id}");
+        if (response.IsSuccessStatusCode)
+        {
+            users.Remove(user);
+            Snackbar.Add("User deleted successfully", Severity.Success);
+        }
+        else
+        {
+            Snackbar.Add("Failed to delete user", Severity.Error);
+        }
+    }
+
+    private void AddUser(User model)
+    {
+        var newUser = model;
+        users.Add(newUser);
+        Snackbar.Add("New user added (remember to save it!)", Severity.Info);
+    }
+}
